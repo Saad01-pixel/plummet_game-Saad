@@ -5,7 +5,7 @@
 
 ## Description du jeu
 
-**Plummet Game** est un jeu où le joueur contrôle un personnage qui se déplace de gauche à droite à travers un tableau. L'objectif est d'atteindre la ligne d'arrivée tout en évitant des obstacles sous forme de murs. Le joueur doit franchir ces murs, qui peuvent être détruits lors des collisions. À chaque collision, l'énergie du joueur diminue. Le score est calculé en fonction de l'énergie restante, du nombre de collisions et du nombre de murs restant.
+**Plummet Game** Le joueur dois se rendre a la fin
 
 ## Hiérarchie des classes
 
