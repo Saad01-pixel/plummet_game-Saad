@@ -52,11 +52,7 @@ Le `GameEventManager` gère les événements du jeu, comme la fin du jeu ou le r
 - **Système d'événements** : Le jeu détecte la fin du jeu et redémarre en fonction de l'état de l'énergie du joueur et de l'atteinte de la ligne d'arrivée.
 - **Sauvegarde de la progression** : Les scores sont enregistrés dans une base de données MongoDB pour conserver la progression du joueur.
 
-## Installation et utilisation
 
-1. Clonez le projet avec la commande suivante :
-   ```bash
-   git clone https://github.com/sdpoueme/plummet-game.git
 
 
 ----------------------------------------------------------
