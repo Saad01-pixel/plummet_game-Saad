@@ -57,4 +57,30 @@ Le `GameEventManager` gère les événements du jeu, comme la fin du jeu ou le r
 
 ----------------------------------------------------------
 
+## Patrons de Conception
+
+### 1. **Facade (GameManager)**
+Le patron **Facade** est utilisé dans la classe `GameManager` pour fournir une interface simplifiée pour les interactions avec le jeu. Vous utilisez `GameManager` pour démarrer, arrêter ou redémarrer le jeu, en masquant la complexité sous-jacente du système de jeu.
+
+### 2. **Singleton (ScoreManager)**
+Le patron **Singleton** est utilisé dans la classe `ScoreManager` pour garantir qu'il n'y a qu'une seule instance de `ScoreManager` tout au long du jeu. Cela permet de garantir une gestion cohérente du score global à travers l'ensemble du jeu.
+
+### 3. **Strategy (Player, AIManager)**
+Le patron **Strategy** est appliqué dans les classes `Player` et `AIManager` pour permettre de changer dynamiquement la manière dont le joueur se déplace. Selon le mode de jeu, le joueur peut soit se déplacer manuellement, soit être contrôlé par l'IA. Le comportement de déplacement peut donc être modifié à la volée.
+
+### 4. **State (Player, AIManager)**
+Le patron **State** est utilisé pour gérer les différents états dans lesquels un joueur ou un système peut se trouver. Par exemple, un joueur ou une IA peut être dans un état de "mouvement" ou dans un état "bloqué", et ce patron permet de gérer de manière fluide ces transitions d'état.
+
+### 5. **Observer (Wall, GameEventManager)**
+Le patron **Observer** est utilisé dans les classes `Wall` et `GameEventManager` pour permettre aux objets du jeu de réagir à certains événements. Par exemple, les murs réagissent aux collisions avec le joueur et se détruisent en conséquence. De plus, `GameEventManager` alerte le jeu lorsqu'un événement important (comme la fin du jeu) se produit, permettant à d'autres systèmes de réagir en conséquence.
+
+### 6. **Composite (Score)**
+Le patron **Composite** est utilisé dans la classe `Score` pour structurer le score du joueur. Le score est une combinaison de plusieurs facteurs, comme l'énergie restante, le nombre de collisions, et les murs détruits. Ce patron permet de gérer facilement ces éléments complexes comme un tout cohérent.
+
+
+
+
+
+
+
 
