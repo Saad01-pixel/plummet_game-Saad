@@ -3,38 +3,38 @@ using UnityEngine.UI;
 
 public class ScoreManager : MonoBehaviour
 {
-    // Energy variables
+    // Energy var
     public int maxEnergy = 1000;
     public int minEnergy = 0;
     private int currentEnergy;
 
-    // Player collision count
+    // Collision count
     private int collisions;
 
     // Wall count
     private int wallCount;
 
-    // UI elements for displaying energy, collisions, and walls
+    // UI 
     public Text energyText;
     public Text collisionText;
     public Text wallText;
 
-    private Player player;  // Reference to the Player script
+    private Player player;  // L Player 
 
     void Start()
     {
-        // Initializing the player and energy
+        // Initisalization
         player = FindObjectOfType<Player>();
         currentEnergy = maxEnergy;
-        collisions = player.playerData.collisions;  // Start with collisions from PlayerData
-        wallCount = GameObject.FindGameObjectsWithTag("Wall").Length; // Count walls in the scene
+        collisions = player.playerData.collisions;  
+        wallCount = GameObject.FindGameObjectsWithTag("Wall").Length; // How many walls in Scene
 
         UpdateUI();
     }
 
     void Update()
     {
-        // Every time the player collides, decrease energy and increment collisions
+        // Player collide = Decrease energy and increment collisions
         if (player.playerData.collisions > collisions)
         {
             collisions = player.playerData.collisions;
@@ -45,33 +45,29 @@ public class ScoreManager : MonoBehaviour
         UpdateUI();
     }
 
-    // Handle collision logic (energy decrease)
+    // Energy decrease
     void HandleCollision()
     {
-        // Decrease energy when collision happens
+        // Whe ncollision happens dcecrease
         currentEnergy -= 50;
         if (currentEnergy < minEnergy)
         {
             currentEnergy = minEnergy;
         }
 
-        // Optionally, you could have additional logic for wall interaction
-        // (e.g., when all walls are gone, end the game or display a message)
-        if (wallCount == 0)
-        {
-            EndGame();
-        }
     }
 
-    // Method to update UI elements
+    // Le UI
     void UpdateUI()
     {
         energyText.text = "Energy: " + currentEnergy;
         collisionText.text = "Collisions: " + collisions;
-        wallText.text = "Walls Remaining: " + wallCount;
+        wallText.text = "Walls that are Keft: " + wallCount;
+        scoreText.text = "Score: " + CalculateScore();
     }
 
-    // Method to decrement the wall count
+
+    // Wall count
     public void DecreaseWallCount()
     {
         wallCount--;
@@ -81,14 +77,21 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
-    // Method to end the game when all walls are gone
-    void EndGame()
+    public void UpdateScore(float newScore)
     {
-        Debug.Log("Game Over: All walls are gone!");
-        // Implement game over logic here
+        // Update le score dans le score manager
+       
+        Debug.Log("Updated Score: " + newScore);
     }
 
-    // Method to interact with the PlayerData to save/load energy, collisions, etc.
+
+    void EndGame()
+    {
+        Debug.Log("Game Over: OOF!");
+        // Game over
+    }
+
+    // Player + Save data/Load Data
     public void SaveGameData()
     {
         player.playerData.collisions = collisions;

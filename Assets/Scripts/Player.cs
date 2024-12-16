@@ -1,8 +1,58 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 public class Player : MonoBehaviour
 {
+
+    public string plummie_tag;
+    public int collisions;
+    public int steps;
+
+    // Nom de la base de données MongoDB et de la collection où nous stockerons les scores
+    private string connectionString = "your_mongodb_connection_string"; // Remplacez par connection
+    private string databaseName = "GameProgression";
+    private string collectionName = "progression";
+
+    public string Stringify()
+    {
+        return JsonUtility.ToJson(this);
+    }
+
+    public static PlayerData Parse(string json)
+    {
+        return JsonUtility.FromJson<PlayerData>(json);
+    }
+
+    // Sauve les donner du joueur
+    public async Task SavePlayerDataAsync()
+    {
+        // Creer un objet JSON 
+        var scoreData = new BsonDocument
+        {
+            { "game", "NomPrenomEtudiant_fall_guy" },
+            { "score", this.collisions },
+            { "timestamp", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }
+        };
+
+        // Connexion Mongo
+        var client = new MongoClient(connectionString);
+        var database = client.GetDatabase(databaseName);
+        var collection = database.GetCollection<BsonDocument>(collectionName);
+
+        // Le score dans la base de donnee
+        try
+        {
+            await collection.InsertOneAsync(scoreData);
+            Debug.Log("Score sauvegardé avec succès !");
+        }
+        catch (Exception )
+        {
+            Debug.LogError($"Erreur de sauvegarde dans MongoDB : ");
+        }
+
+
     // Vitesse de mouvement du joueur
     public float speed = 1.5f;
     private Rigidbody2D rigidBody2D;
@@ -23,7 +73,11 @@ public class Player : MonoBehaviour
     private float backtrackDistance = 2f; // distance de recul pour essayer un nouveau chemin
 
     //Question 4 : Gestion de l'évènement fin du jeu
-    
+    public static event System.Action OnGameOver;
+
+    private ScoreManager scoreManager; // referance au scoremanager
+
+
     void Start()
     {
         _isGameOver = false;
@@ -36,6 +90,73 @@ public class Player : MonoBehaviour
         // rajouter l'appel de fonction requis
 
         //Question 4 : Gestion de l'évènement fin du jeu
+        // score manager referance
+        scoreManager = FindObjectOfType<ScoreManager>();
+
+        // Evenement gameover
+        OnGameOver += RestartGame;
+    }
+
+
+    void CheckGameOver()
+    {
+        // 
+        if (rigidBody2D.position.x > 24.0f && !_isGameOver)
+        {
+            _isGameOver = true;
+            Debug.Log("Reached the finish line!");
+            OnGameOver?.Invoke(); // Déclenche l'événement OnGameOver
+        }
+
+       
+    }
+
+    // Méthode qui sera appelée lors de la fin du jeu
+    void RestartGame()
+    {
+        Debug.Log("Restart");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Redemarre la scene
+    }
+
+    void Update()
+    {
+        // Verification si il atteint la ligne
+        if (!_isGameOver)
+        {
+            // Logic movement
+
+            CheckGameOver(); // Vérifie si le jeu est terminé (ligne d'arrivée ou énergie)
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (!_isGameOver)
+        {
+            Vector2 newPosition = rigidBody2D.position + movement * Time.fixedDeltaTime;
+            rigidBody2D.MovePosition(newPosition);
+        }
+    }
+
+    // Méthode qui s'execute lorsque il y a collision
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        playerData.collisions++;
+
+        // Le code pour vérifier les collisions et gérer le mode AI peut être ajouté ici
+    }
+
+    // Dessin et coloration des gizmos
+    void OnDrawGizmos()
+    {
+        if (path != null && path.Count > 0)
+        {
+            Gizmos.color = Color.yellow;
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                Gizmos.DrawLine(path[i], path[i + 1]);
+            }
+        }
     }
 
     //methode qui calcule le chemin a prendre en Mode AI
@@ -98,8 +219,29 @@ public class Player : MonoBehaviour
     void Update()
     {
         //Question 3: Calcul et mise à jour des scores 
+        public async Task LoadPlayerDataAsync()
+        {
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            var collection = database.GetCollection<BsonDocument>(collectionName);
 
-        if (!_isGameOver)
+            // Rechercher les scores précédents (ici nous cherchons tous les documents)
+            var filter = Builders<BsonDocument>.Filter.Eq("game", "NomPrenomEtudiant_fall_guy");
+            var results = await collection.Find(filter).ToListAsync();
+
+            if (results.Count > 0)
+            {
+                // Traiter les résultats
+                Debug.Log("Scores précédents récupérés !");
+            }
+            else
+            {
+                Debug.Log("Aucun score trouvé.");
+            }
+
+
+
+            if (!_isGameOver)
         {
             //introduire le mode AI dans cette fonction
             //si le jeu est en mode AI alors le AI controlle le mouvement 
@@ -109,21 +251,24 @@ public class Player : MonoBehaviour
             float v = Input.GetAxis("Vertical");
             movement = new Vector2(h * speed, v * speed);
 
-           
-            //Question 6 - Mode AI
-            /*if (!...)
-            {
-                
-            }
-            else
-            {
-                UpdateAIMovement();
-                CheckIfStuck();
-            }*/
-        }
 
-        //Question 5 : Sauvegarde de la progression du jeu 
-    }
+                //Question 6 - Mode AI
+                if (!isAIMode)
+                {
+                    // Si le mode AI est deactiver
+                    
+                    float h = Input.GetAxis("Horizontal");
+                    float v = Input.GetAxis("Vertical");
+                    movement = new Vector2(h * speed, v * speed);
+                }
+                else
+                {
+                    // Si le mode AI est activer
+                    UpdateAIMovement();  // Met à jour le mouvement 
+                    CheckIfStuck();      // Ver si le joueur est bloquer
+                }
+                //Question 5 : Sauvegarde de la progression du jeu 
+            }
 
     //mouvement automatique controlle par le mode AI
     void UpdateAIMovement()
@@ -171,23 +316,25 @@ public class Player : MonoBehaviour
     //methode qui s'execute lorsque il y a collision
     void OnCollisionEnter2D(Collision2D collision)
     {
-        playerData.collisions++;
+                playerData.collisions++;  // incremente
 
-        // Question 6 : Ajout d'un mode AI  - verifie si on est bloque apres une collision
-        // corriger pour faire fonctionner le mode AI
-       /*if (...)
-        {
-            stuckCounter++; // incremente le compteur de detection lorsque le joueur est bloque
-            if (stuckCounter > 2) // si il y a trop de collisions alors le jouur est bloque
-            {
-                BacktrackAndFindNewPath();
+                // Question 6 : Ajout d'un mode AI - Vérifie si le joueur est bloqué après une collision
+                if (isAIMode)  // Si le mode AI est act
+                {
+                    stuckCounter++; // Incremente
+
+                    if (stuckCounter > 2) // joueur bloquer
+                    {
+                        // full
+                        BacktrackAndFindNewPath();
+                    }
+                    else
+                    {
+                        // Sinon recalcule chemin
+                        CalculatePath();
+                    }
+                }
             }
-            else
-            {
-                CalculatePath();
-            }
-        }*/
-    }
 
     //dessin et coloration des gizmos
     void OnDrawGizmos()
@@ -202,5 +349,15 @@ public class Player : MonoBehaviour
         }
     }
 
-    //Question 4 : Gestion de l'évènement fin du jeu
+    void OnEnable()  
+    {
+        ScoreManager.OnGameOver += RestartGame;
+    }
+
+    void OnDisable()
+    {
+        ScoreManager.OnGameOver -= RestartGame;
+    }
+
+
 }
